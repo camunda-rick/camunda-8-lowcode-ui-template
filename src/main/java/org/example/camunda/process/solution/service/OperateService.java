@@ -2,7 +2,6 @@ package org.example.camunda.process.solution.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.camunda.operate.CamundaOperateClient;
 import io.camunda.operate.CamundaOperateClientConfiguration;
@@ -37,7 +36,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.example.camunda.process.solution.utils.JsonUtils;
 import org.slf4j.Logger;
@@ -85,14 +83,20 @@ public class OperateService {
       Authentication auth = null;
       if (!"notProvided".equals(clientId)) {
         try {
-          URL operateUrl = URI.create("https://"+ region +".operate.camunda.io/" + clusterId).toURL();
+          URL operateUrl =
+              URI.create("https://" + region + ".operate.camunda.io/" + clusterId).toURL();
           URL authUrl = URI.create("https://login.cloud.camunda.io/oauth/token").toURL();
 
-          JwtCredential credentials = new JwtCredential(clientId, clientSecret, "operate.camunda.io", authUrl, null);
+          JwtCredential credentials =
+              new JwtCredential(clientId, clientSecret, "operate.camunda.io", authUrl, null);
           ObjectMapper objectMapper = new ObjectMapper();
-          TokenResponseMapper tokenResponseMapper = new TokenResponseMapper.JacksonTokenResponseMapper(objectMapper);
-          JwtAuthentication authentication = new JwtAuthentication(credentials, tokenResponseMapper);
-          CamundaOperateClientConfiguration configuration = new CamundaOperateClientConfiguration(authentication, operateUrl, objectMapper, HttpClients.createDefault());
+          TokenResponseMapper tokenResponseMapper =
+              new TokenResponseMapper.JacksonTokenResponseMapper(objectMapper);
+          JwtAuthentication authentication =
+              new JwtAuthentication(credentials, tokenResponseMapper);
+          CamundaOperateClientConfiguration configuration =
+              new CamundaOperateClientConfiguration(
+                  authentication, operateUrl, objectMapper, HttpClients.createDefault());
           client = new CamundaOperateClient(configuration);
         } catch (MalformedURLException e) {
           throw new OperateException("Error with Operate URLs", e);
@@ -104,11 +108,17 @@ public class OperateService {
           URL operateUrl = URI.create(targetOperateUrl).toURL();
           URL authUrl = URI.create(tokenUrl).toURL();
 
-          JwtCredential credentials = new JwtCredential(identityClientId, identityClientSecret, identityClientId, authUrl, null);
+          JwtCredential credentials =
+              new JwtCredential(
+                  identityClientId, identityClientSecret, identityClientId, authUrl, null);
           ObjectMapper objectMapper = new ObjectMapper();
-          TokenResponseMapper tokenResponseMapper = new TokenResponseMapper.JacksonTokenResponseMapper(objectMapper);
-          JwtAuthentication authentication = new JwtAuthentication(credentials, tokenResponseMapper);
-          CamundaOperateClientConfiguration configuration = new CamundaOperateClientConfiguration(authentication, operateUrl, objectMapper, HttpClients.createDefault());
+          TokenResponseMapper tokenResponseMapper =
+              new TokenResponseMapper.JacksonTokenResponseMapper(objectMapper);
+          JwtAuthentication authentication =
+              new JwtAuthentication(credentials, tokenResponseMapper);
+          CamundaOperateClientConfiguration configuration =
+              new CamundaOperateClientConfiguration(
+                  authentication, operateUrl, objectMapper, HttpClients.createDefault());
           client = new CamundaOperateClient(configuration);
         } catch (MalformedURLException e) {
           throw new OperateException("Error with Operate URLs", e);
@@ -119,15 +129,15 @@ public class OperateService {
   }
 
   public ProcessDefinition getLatestProcessDefinition(String bpmnProcessId)
-          throws OperateException {
+      throws OperateException {
     ProcessDefinitionFilter processDefinitionFilter =
-            ProcessDefinitionFilter.builder().bpmnProcessId(bpmnProcessId).build();
+        ProcessDefinitionFilter.builder().bpmnProcessId(bpmnProcessId).build();
     SearchQuery procDefQuery =
-            new SearchQuery.Builder()
-                    .filter(processDefinitionFilter)
-                    .size(1)
-                    .sort(new Sort("version", SortOrder.DESC))
-                    .build();
+        new SearchQuery.Builder()
+            .filter(processDefinitionFilter)
+            .size(1)
+            .sort(new Sort("version", SortOrder.DESC))
+            .build();
 
     List<ProcessDefinition> def = getCamundaOperateClient().searchProcessDefinitions(procDefQuery);
     if (def != null && def.size() > 0) {
@@ -139,11 +149,11 @@ public class OperateService {
   public List<ProcessDefinition> getProcessDefinitions() throws OperateException {
     ProcessDefinitionFilter processDefinitionFilter = ProcessDefinitionFilter.builder().build();
     SearchQuery procDefQuery =
-            new SearchQuery.Builder()
-                    .filter(processDefinitionFilter)
-                    .size(1000)
-                    .sort(new Sort("version", SortOrder.DESC))
-                    .build();
+        new SearchQuery.Builder()
+            .filter(processDefinitionFilter)
+            .size(1000)
+            .sort(new Sort("version", SortOrder.DESC))
+            .build();
 
     return getCamundaOperateClient().searchProcessDefinitions(procDefQuery);
   }
@@ -156,9 +166,9 @@ public class OperateService {
 
   public Map<String, Set<JsonNode>> listVariables() throws OperateException, IOException {
     List<Variable> vars =
-            getCamundaOperateClient()
-                    .searchVariables(
-                            new SearchQuery.Builder().filter(new VariableFilter()).size(1000).build());
+        getCamundaOperateClient()
+            .searchVariables(
+                new SearchQuery.Builder().filter(new VariableFilter()).size(1000).build());
     Map<String, Set<JsonNode>> result = new HashMap<>();
     for (Variable var : vars) {
       if (!result.containsKey(var.getName())) {
@@ -170,14 +180,14 @@ public class OperateService {
   }
 
   public SearchResult<ProcessInstance> getProcessInstances(
-          String bpmnProcessId, ProcessInstanceState state, Integer pageSize, Long after)
-          throws OperateException {
+      String bpmnProcessId, ProcessInstanceState state, Integer pageSize, Long after)
+      throws OperateException {
     SearchQuery q =
-            new SearchQuery.Builder()
-                    .filter(
-                            ProcessInstanceFilter.builder().state(state).bpmnProcessId(bpmnProcessId).build())
-                    .size(pageSize)
-                    .build();
+        new SearchQuery.Builder()
+            .filter(
+                ProcessInstanceFilter.builder().state(state).bpmnProcessId(bpmnProcessId).build())
+            .size(pageSize)
+            .build();
     if (after != null) {
       q.setSearchAfter(List.of(after));
     }
@@ -186,31 +196,31 @@ public class OperateService {
 
   public List<Variable> getVariables(Long processInstanceKey) throws OperateException {
     return getCamundaOperateClient()
-            .searchVariables(
-                    new SearchQuery.Builder()
-                            .filter(
-                                    VariableFilter.builder()
-                                            .processInstanceKey(processInstanceKey)
-                                            .scopeKey(processInstanceKey)
-                                            .build())
-                            .size(200)
-                            .build());
+        .searchVariables(
+            new SearchQuery.Builder()
+                .filter(
+                    VariableFilter.builder()
+                        .processInstanceKey(processInstanceKey)
+                        .scopeKey(processInstanceKey)
+                        .build())
+                .size(200)
+                .build());
   }
 
   public <T> T getVariable(Long processInstanceKey, String variableName, TypeReference<T> type)
-          throws OperateException {
+      throws OperateException {
     List<Variable> res =
-            getCamundaOperateClient()
-                    .searchVariables(
-                            new SearchQuery.Builder()
-                                    .filter(
-                                            VariableFilter.builder()
-                                                    .processInstanceKey(processInstanceKey)
-                                                    .name(variableName)
-                                                    .scopeKey(processInstanceKey)
-                                                    .build())
-                                    .size(1)
-                                    .build());
+        getCamundaOperateClient()
+            .searchVariables(
+                new SearchQuery.Builder()
+                    .filter(
+                        VariableFilter.builder()
+                            .processInstanceKey(processInstanceKey)
+                            .name(variableName)
+                            .scopeKey(processInstanceKey)
+                            .build())
+                    .size(1)
+                    .build());
     if (res != null && res.size() > 0) {
       return JsonUtils.toParametrizedObject(res.get(0).getValue(), type);
     }
@@ -234,13 +244,13 @@ public class OperateService {
           result.put(var.getName(), nodeValue.textValue());
         } else if (nodeValue.isArray()) {
           result.put(
-                  var.getName(),
-                  JsonUtils.toParametrizedObject(var.getValue(), new TypeReference<List<?>>() {}));
+              var.getName(),
+              JsonUtils.toParametrizedObject(var.getValue(), new TypeReference<List<?>>() {}));
         } else {
           result.put(
-                  var.getName(),
-                  JsonUtils.toParametrizedObject(
-                          var.getValue(), new TypeReference<Map<String, Object>>() {}));
+              var.getName(),
+              JsonUtils.toParametrizedObject(
+                  var.getValue(), new TypeReference<Map<String, Object>>() {}));
         }
       }
       return result;
@@ -250,21 +260,21 @@ public class OperateService {
   }
 
   public Map<Long, Map<String, Object>> getVariables(List<ProcessInstance> processInstances)
-          throws OperateException {
+      throws OperateException {
     try {
       Map<Long, Future<Map<String, Object>>> futures = new HashMap<>();
       Map<Long, Map<String, Object>> instanceMap = new HashMap<>();
       for (ProcessInstance instance : processInstances) {
         futures.put(
-                instance.getKey(),
-                CompletableFuture.supplyAsync(
-                        () -> {
-                          try {
-                            return getVariablesAsMap(instance.getKey());
-                          } catch (OperateException e) {
-                            return null;
-                          }
-                        }));
+            instance.getKey(),
+            CompletableFuture.supplyAsync(
+                () -> {
+                  try {
+                    return getVariablesAsMap(instance.getKey());
+                  } catch (OperateException e) {
+                    return null;
+                  }
+                }));
       }
       for (Map.Entry<Long, Future<Map<String, Object>>> varFutures : futures.entrySet()) {
         Map<String, Object> vars = varFutures.getValue().get();
@@ -279,14 +289,14 @@ public class OperateService {
 
   public List<Long> getSubProcessInstances(Long processInstanceKey) throws OperateException {
     SearchQuery q =
-            new SearchQuery.Builder()
-                    .filter(
-                            ProcessInstanceFilter.builder()
-                                    .parentKey(processInstanceKey)
-                                    .state(ProcessInstanceState.ACTIVE)
-                                    .build())
-                    .size(100)
-                    .build();
+        new SearchQuery.Builder()
+            .filter(
+                ProcessInstanceFilter.builder()
+                    .parentKey(processInstanceKey)
+                    .state(ProcessInstanceState.ACTIVE)
+                    .build())
+            .size(100)
+            .build();
 
     List<ProcessInstance> subprocs = getCamundaOperateClient().searchProcessInstances(q);
     List<Long> result = new ArrayList<>();
@@ -299,15 +309,15 @@ public class OperateService {
   }
 
   public List<FlowNodeInstance> getProcessInstanceHistory(Long processInstanceKey)
-          throws OperateException {
+      throws OperateException {
     FlowNodeInstanceFilter flowNodeFilter =
-            FlowNodeInstanceFilter.builder().processInstanceKey(processInstanceKey).build();
+        FlowNodeInstanceFilter.builder().processInstanceKey(processInstanceKey).build();
     SearchQuery procInstQuery =
-            new SearchQuery.Builder()
-                    .filter(flowNodeFilter)
-                    .size(1000)
-                    .sort(new Sort("startDate", SortOrder.DESC))
-                    .build();
+        new SearchQuery.Builder()
+            .filter(flowNodeFilter)
+            .size(1000)
+            .sort(new Sort("startDate", SortOrder.DESC))
+            .build();
 
     return getCamundaOperateClient().searchFlowNodeInstances(procInstQuery);
   }

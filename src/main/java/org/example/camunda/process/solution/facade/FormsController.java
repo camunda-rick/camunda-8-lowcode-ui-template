@@ -62,7 +62,7 @@ public class FormsController extends AbstractController {
         schemaModif.put("generator", form.getGenerator());
       }
     }
-    if (schema!=null && locale != null) {
+    if (schema != null && locale != null) {
       internationalizationService.translateFormSchema(schema, locale);
     }
     return schema;
