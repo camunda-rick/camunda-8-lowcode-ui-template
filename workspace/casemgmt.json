@@ -21,7 +21,16 @@
     } ],
     "dispute-chargeback-lean" : [ {
       "id" : "Event_1h77ue9",
-      "enabled" : true,
+      "enabled" : false,
+      "bpmnProcessId" : "dispute-chargeback-lean",
+      "elementIds" : null,
+      "message" : "Message_0ua5dc0",
+      "name" : "Income evidence from bank counterpart",
+      "formKey" : null,
+      "correlationKey" : "=disputeNumber"
+    }, {
+      "id" : "Event_IncomingEvidence",
+      "enabled" : false,
       "bpmnProcessId" : "dispute-chargeback-lean",
       "elementIds" : null,
       "message" : "Message_0ua5dc0",
