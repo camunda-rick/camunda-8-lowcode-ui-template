@@ -1,7 +1,7 @@
 {
   "name" : "ACME",
-  "modified" : 1739289502456,
-  "active" : true,
+  "modified" : 1739360192968,
+  "active" : false,
   "cryptPassword" : true,
   "users" : [ {
     "username" : "chris",
